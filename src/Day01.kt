@@ -12,7 +12,7 @@ fun main() {
 
     fun part2(input: List<String>): Int = calibrationSum(input) { line ->
         DIGIT_PATTERN.findAll(line)
-            .map { it.groups.filterNotNull().last().value }
+            .map { it.groupValues.first(String::isNotEmpty) }
             .map { c -> DIGIT_MAPPING[c] ?: c }
             .map { it.toInt() }
             .toList()
@@ -25,7 +25,7 @@ fun main() {
 }
 
 
-val DIGIT_PATTERN = Regex("(?=(zero)|(one)|(two)|(three)|(four)|(five)|(six)|(seven)|(eight)|(nine)|([0-9]))")
+val DIGIT_PATTERN = Regex("(?=(zero|one|two|three|four|five|six|seven|eight|nine|[0-9]))")
 
 //@formatter:off
 val DIGIT_MAPPING = mapOf(
