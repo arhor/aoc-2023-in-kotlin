@@ -1,25 +1,62 @@
+import java.util.LinkedList
+
 fun main() {
-    val input = readInput("Day04")
+    val data = readInput("Day04").parse()
 
     fun part1(): Int =
-        parse(input)
-            .map { it.act.filter(it.win::contains) }
+        data.map { it.act.filter(it.win::contains) }
             .filter { it.isNotEmpty() }
             .sumOf { 1 shl (it.size - 1) }
 
     fun part2(): Int {
-        val table = parse(input).associateBy { it.num }
+        val table = data.associateBy { it.num }
+        val outer = noRecursive(table, data)
 
-        return 0
+        return outer.size
     }
 
     part1().println()
     part2().println()
 }
 
+private fun noRecursive(table: Map<Int, Card>, cards: List<Card>): List<Card> {
+    val result = LinkedList<Card>()
+    val copies = LinkedList<Card>()
+    for (card in cards) {
+        result.add(card)
+        val matchings = card.act.filter(card.win::contains)
+        if (matchings.isNotEmpty()) {
+
+            val from = card.num + 1
+            val upto = from + matchings.size - 1
+
+            val originals = (from..upto).map(table::get)
+            val winners = originals.filterNotNull()
+
+            copies.addAll(winners)
+        }
+    }
+
+    while (copies.isNotEmpty()) {
+        val card = copies.pop()
+        result.add(card)
+        val matchings = card.act.filter(card.win::contains)
+        if (matchings.isNotEmpty()) {
+            val from = card.num + 1
+            val upto = from + matchings.size - 1
+
+            val originals = (from..upto).map(table::get)
+            val winners = originals.filterNotNull()
+
+            copies.addAll(winners)
+        }
+    }
+    return result
+}
+
 private data class Card(val num: Int, val win: Set<Int>, val act: Set<Int>)
 
-private fun parse(input: List<String>): List<Card> = input.mapNotNull(pattern::find).map {
+private fun List<String>.parse(): List<Card> = mapNotNull(pattern::find).map {
     Card(
         num = it.groups["num"]!!.value.toInt(),
         win = it.groups["win"]!!.value.numbers,
