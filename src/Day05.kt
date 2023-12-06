@@ -20,7 +20,7 @@ fun main() {
             initial = lines.first().single().split(":").let { (type, data) ->
                 Value(
                     type = type,
-                    data = data.split(" ").filter(String::isNotEmpty).map(String::toLong)
+                    data = data.numbers()
                 )
             },
             mapping = lines.drop(1).map { line ->
@@ -28,7 +28,7 @@ fun main() {
                     Mapping(
                         from = match["from"]!!.value,
                         into = match["into"]!!.value,
-                        data = line.drop(1).map { it.split(" ").map(String::toLong) }
+                        data = line.drop(1).map { it.numbers() }
                     )
                 }
             }
