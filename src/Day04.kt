@@ -25,7 +25,7 @@ private tailrec fun calcScore(table: Map<Int, Card>, cards: Queue<Card>, result:
     } else {
         val card = cards.poll()
         val from = card.num + 1
-        val upto = from + card.act.filter(card.win::contains).size - 1
+        val upto = from + card.act.filter(card.win::contains).lastIndex
 
         cards += (from..upto).mapNotNull(table::get)
 
