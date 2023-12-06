@@ -20,22 +20,8 @@ fun main() {
 }
 
 private fun noRecursive(table: Map<Int, Card>, cards: List<Card>): List<Card> {
+    val copies = LinkedList(cards)
     val result = LinkedList<Card>()
-    val copies = LinkedList<Card>()
-    for (card in cards) {
-        result.add(card)
-        val matchings = card.act.filter(card.win::contains)
-        if (matchings.isNotEmpty()) {
-
-            val from = card.num + 1
-            val upto = from + matchings.size - 1
-
-            val originals = (from..upto).map(table::get)
-            val winners = originals.filterNotNull()
-
-            copies.addAll(winners)
-        }
-    }
 
     while (copies.isNotEmpty()) {
         val card = copies.pop()
