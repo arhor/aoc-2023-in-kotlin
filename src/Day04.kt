@@ -27,7 +27,6 @@ private fun noRecursive(table: Map<Int, Card>, cards: List<Card>): List<Card> {
         val card = copies.pop()
         result.add(card)
         val matchings = card.act.filter(card.win::contains)
-        if (matchings.isNotEmpty()) {
             val from = card.num + 1
             val upto = from + matchings.size - 1
 
@@ -35,7 +34,6 @@ private fun noRecursive(table: Map<Int, Card>, cards: List<Card>): List<Card> {
             val winners = originals.filterNotNull()
 
             copies.addAll(winners)
-        }
     }
     return result
 }
