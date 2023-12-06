@@ -1,4 +1,5 @@
 import java.util.LinkedList
+import java.util.Queue
 
 fun main() {
     val data = readInput("Day04").parse()
@@ -8,32 +9,28 @@ fun main() {
             .filter { it.isNotEmpty() }
             .sumOf { 1 shl (it.size - 1) }
 
-    fun part2(): Int {
-        val table = data.associateBy { it.num }
-        val outer = noRecursive(table, data)
-
-        return outer
-    }
+    fun part2(): Int =
+        calcScore(
+            table = data.associateBy { it.num },
+            cards = LinkedList(data),
+        )
 
     part1().println()
     part2().println()
 }
 
-private fun noRecursive(table: Map<Int, Card>, cards: List<Card>): Int {
-    val copies = LinkedList(cards)
-    var result = 0
-
-    while (copies.isNotEmpty()) {
-        val card = copies.pop().also { result++ }
-        val matchings = card.act.filter(card.win::contains)
-
+private tailrec fun calcScore(table: Map<Int, Card>, cards: Queue<Card>, result: Int = 0): Int =
+    if (cards.isEmpty()) {
+        result
+    } else {
+        val card = cards.poll()
         val from = card.num + 1
-        val upto = from + matchings.size - 1
+        val upto = from + card.act.filter(card.win::contains).size - 1
 
-        copies += (from..upto).mapNotNull(table::get)
+        cards += (from..upto).mapNotNull(table::get)
+
+        calcScore(table, cards, result + 1)
     }
-    return result
-}
 
 private data class Card(val num: Int, val win: Set<Int>, val act: Set<Int>)
 
