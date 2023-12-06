@@ -1,34 +1,29 @@
 fun main() {
-    data class Value(
-        val type: String,
-        val data: List<Long>,
-    )
+    data class Value(val type: String, val data: List<Long>)
+    data class Descriptor(val rangeInto: Long, val rangeFrom: Long, val rangeSize: Long)
+    data class Mapping(val from: String, val into: String, val data: List<Descriptor>)
+    data class Model(val initial: Value, val mapping: List<Mapping>)
 
-    data class Mapping(
-        val from: String,
-        val into: String,
-        val data: List<List<Long>>,
-    )
-
-    data class Model(
-        val initial: Value,
-        val mapping: List<Mapping>,
-    )
-
-    val data = readInput("Day05").split("").let { lines ->
+    val data = readInput("Day05").split("").destruct().let { (head, tail) ->
         Model(
-            initial = lines.first().single().split(":").let { (type, data) ->
+            initial = head.single().split(":").let { (type, data) ->
                 Value(
                     type = type,
                     data = data.numbers()
                 )
             },
-            mapping = lines.drop(1).map { line ->
+            mapping = tail.map { line ->
                 pattern.find(line.first())!!.groups.let { match ->
                     Mapping(
                         from = match["from"]!!.value,
                         into = match["into"]!!.value,
-                        data = line.drop(1).map { it.numbers() }
+                        data = line.drop(1).map(String::numbers).map { (one, two, thr) ->
+                            Descriptor(
+                                rangeInto = one,
+                                rangeFrom = two,
+                                rangeSize = thr,
+                            )
+                        }
                     )
                 }
             }

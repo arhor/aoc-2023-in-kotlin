@@ -64,6 +64,8 @@ data class Point(val x: Int, val y: Int) : Comparable<Point> {
 
 fun String.numbers(separator: Char = ' ') = split(separator).filter(String::isNotEmpty).map(String::toLong)
 
+fun <T> List<T>.destruct(): Pair<T, List<T>> = first() to drop(1)
+
 fun <T> List<T>.split(separator: T): List<List<T>> {
     val result = LinkedList<MutableList<T>>()
     val newRow = { LinkedList<T>().also(result::add) }
