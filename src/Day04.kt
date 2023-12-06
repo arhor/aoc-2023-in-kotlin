@@ -12,28 +12,25 @@ fun main() {
         val table = data.associateBy { it.num }
         val outer = noRecursive(table, data)
 
-        return outer.size
+        return outer
     }
 
     part1().println()
     part2().println()
 }
 
-private fun noRecursive(table: Map<Int, Card>, cards: List<Card>): List<Card> {
+private fun noRecursive(table: Map<Int, Card>, cards: List<Card>): Int {
     val copies = LinkedList(cards)
-    val result = LinkedList<Card>()
+    var result = 0
 
     while (copies.isNotEmpty()) {
-        val card = copies.pop()
-        result.add(card)
+        val card = copies.pop().also { result++ }
         val matchings = card.act.filter(card.win::contains)
-            val from = card.num + 1
-            val upto = from + matchings.size - 1
 
-            val originals = (from..upto).map(table::get)
-            val winners = originals.filterNotNull()
+        val from = card.num + 1
+        val upto = from + matchings.size - 1
 
-            copies.addAll(winners)
+        copies += (from..upto).mapNotNull(table::get)
     }
     return result
 }
