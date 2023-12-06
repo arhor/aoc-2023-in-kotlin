@@ -1,5 +1,6 @@
 import java.math.BigInteger
 import java.security.MessageDigest
+import java.util.LinkedList
 import kotlin.io.path.Path
 import kotlin.io.path.readLines
 import kotlin.math.abs
@@ -59,4 +60,18 @@ data class Point(val x: Int, val y: Int) : Comparable<Point> {
     companion object {
         val COMPARATOR: Comparator<Point> = compareBy({ it.y }, { it.x })
     }
+}
+
+fun <T> List<T>.split(separator: T): List<List<T>> {
+    val result = LinkedList<MutableList<T>>()
+    val newRow = { LinkedList<T>().also(result::add) }
+
+    for (it in this) {
+        if (it == separator) {
+            newRow()
+        } else {
+            (result.lastOrNull() ?: newRow()).add(it)
+        }
+    }
+    return result
 }
