@@ -1,8 +1,33 @@
+import java.util.Objects
+import java.util.stream.LongStream
+import kotlin.time.measureTime
+
 fun main() {
-    data class Value(val type: String, val data: List<Long>)
-    data class Range(val rangeInto: Long, val rangeFrom: Long, val rangeSize: Long)
-    data class Mapping(val from: String, val into: String, val ranges: List<Range>)
-    data class Model(val initial: Value, val mappings: List<Mapping>)
+    data class Value(
+        val type: String,
+        val data: List<Long>,
+    )
+
+    data class Range(
+        val rangeFrom: LongRange,
+        val rangeInto: LongRange,
+    ) {
+        constructor(source: Long, target: Long, size: Long) : this(
+            rangeFrom = source..<(source + size),
+            rangeInto = target..<(target + size),
+        )
+    }
+
+    data class Mapping(
+        val from: String,
+        val into: String,
+        val ranges: List<Range>,
+    )
+
+    data class Model(
+        val initial: Value,
+        val mappings: List<Mapping>,
+    )
 
     val pattern = "^(?<from>\\w+)-to-(?<into>\\w+) map:$".toRegex()
 
@@ -19,28 +44,40 @@ fun main() {
                     Mapping(
                         from = match["from"]!!.value,
                         into = match["into"]!!.value,
-                        ranges = tail.map(String::numbers).map { (one, two, thr) ->
-                            Range(
-                                rangeInto = one,
-                                rangeFrom = two,
-                                rangeSize = thr,
-                            )
-                        }
+                        ranges = tail
+                            .map(String::numbers)
+                            .map { (target, source, size) -> Range(source, target, size) }
+                            .sortedBy { it.rangeFrom.first }
                     )
                 }
             }
         )
     }
 
-    fun part1(): Int {
-        var result = model.initial.data
+    operator fun LongRange.get(index: Long): Long {
+        Objects.checkIndex(index, (endInclusive - start) / step)
+        return start + (step * index)
+    }
+
+    fun LongRange.fastIndexOf(value: Long): Long {
+        require(value in this) { "Value $value is not in the range $this" }
+        return (value - start) / step
+    }
+
+    fun part1(): Long = model.initial.data.minOf { value ->
+        var result = value
         for (mapping in model.mappings) {
-            println(mapping)
+            result = mapping.ranges.find { result in it.rangeFrom }
+                ?.let { it.rangeInto[ it.rangeFrom.fastIndexOf(result) ] }
+                ?: result
         }
+        result
+    }
+
+    fun part2(): Long {
         return 0
     }
-    fun part2(): Int = 0
 
-    part1().println()
-    part2().println()
+    measureTime { part1().println() }.also { println("Operation took: $it") }
+    measureTime { part2().println() }.also { println("Operation took: $it") }
 }
