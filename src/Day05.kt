@@ -1,3 +1,4 @@
+import java.util.stream.StreamSupport
 import kotlin.time.measureTime
 
 fun main() {
@@ -56,13 +57,12 @@ fun main() {
     fun LongRange.fastIndexOf(value: Long) = (value - start) / step
 
     fun Iterable<Long>.calculate(): Long = minOf { value ->
-        var result = value
-        for (mapping in model.mappings) {
-            result = mapping.ranges.find { result in it.rangeFrom }
+        model.mappings.fold(value) { result, mapping ->
+            mapping.ranges
+                .find { result in it.rangeFrom }
                 ?.let { it.rangeInto[it.rangeFrom.fastIndexOf(result)] }
                 ?: result
         }
-        result
     }
 
     fun part1(): Long = model.initial.data.calculate()
