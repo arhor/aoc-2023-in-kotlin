@@ -1,5 +1,3 @@
-import java.util.Objects
-import java.util.stream.LongStream
 import kotlin.time.measureTime
 
 fun main() {
@@ -54,28 +52,30 @@ fun main() {
         )
     }
 
-    operator fun LongRange.get(index: Long): Long {
-        Objects.checkIndex(index, (endInclusive - start) / step)
-        return start + (step * index)
-    }
+    operator fun LongRange.get(index: Long) = start + (step * index)
+    fun LongRange.fastIndexOf(value: Long) = (value - start) / step
 
-    fun LongRange.fastIndexOf(value: Long): Long {
-        require(value in this) { "Value $value is not in the range $this" }
-        return (value - start) / step
-    }
-
-    fun part1(): Long = model.initial.data.minOf { value ->
+    fun Iterable<Long>.calculate(): Long = minOf { value ->
         var result = value
         for (mapping in model.mappings) {
             result = mapping.ranges.find { result in it.rangeFrom }
-                ?.let { it.rangeInto[ it.rangeFrom.fastIndexOf(result) ] }
+                ?.let { it.rangeInto[it.rangeFrom.fastIndexOf(result)] }
                 ?: result
         }
         result
     }
 
+    fun part1(): Long = model.initial.data.calculate()
+
     fun part2(): Long {
-        return 0
+        return model.initial.data.chunked(2)
+            .map { (from, size) -> from..<(from + size) }
+            .sortedBy { it.first }
+            .stream()
+            .parallel()
+            .mapToLong { it.calculate() }
+            .min()
+            .asLong
     }
 
     measureTime { part1().println() }.also { println("Operation took: $it") }
