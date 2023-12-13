@@ -36,17 +36,14 @@ fun main() {
 
     fun part1(): Long = model.initial.minOf(::sequentialMap)
 
-    fun part2(): Long {
-        return model.initial.chunked(2)
-            .map { (from, size) -> from..<(from + size) }
-            .sortedBy { it.first }
-            .stream()
-            .parallel()
-            .flatMapToLong { LongStream.rangeClosed(it.first, it.last) }
-            .map(::sequentialMap)
-            .min()
-            .asLong
-    }
+    fun part2(): Long = model.initial.chunked(2)
+        .map { (from, size) -> from..<(from + size) }
+        .stream()
+        .parallel()
+        .flatMapToLong { LongStream.rangeClosed(it.first, it.last) }
+        .map(::sequentialMap)
+        .min()
+        .asLong
 
     measureTime { part1().println() }.also { println("Operation took: $it") }
     measureTime { part2().println() }.also { println("Operation took: $it") }
