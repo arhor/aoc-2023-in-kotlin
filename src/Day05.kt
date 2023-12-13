@@ -1,79 +1,49 @@
-import java.util.stream.StreamSupport
+import java.util.stream.LongStream
 import kotlin.time.measureTime
 
 fun main() {
-    data class Value(
-        val type: String,
-        val data: List<Long>,
-    )
-
-    data class Range(
-        val rangeFrom: LongRange,
-        val rangeInto: LongRange,
-    ) {
+    data class Mapping(val from: LongRange, val into: LongRange) {
         constructor(source: Long, target: Long, size: Long) : this(
-            rangeFrom = source..<(source + size),
-            rangeInto = target..<(target + size),
+            from = source..<(source + size),
+            into = target..<(target + size),
         )
     }
 
-    data class Mapping(
-        val from: String,
-        val into: String,
-        val ranges: List<Range>,
-    )
-
-    data class Model(
-        val initial: Value,
-        val mappings: List<Mapping>,
-    )
-
-    val pattern = "^(?<from>\\w+)-to-(?<into>\\w+) map:$".toRegex()
+    data class Model(val initial: List<Long>, val mapping: List<List<Mapping>>)
 
     val model = readInput("Day05").split("").destruct().let { (head, tail) ->
         Model(
-            initial = head.single().split(":").let { (type, data) ->
-                Value(
-                    type = type,
-                    data = data.numbers()
-                )
+            initial = head.single().split(":").let { (_, data) ->
+                data.numbers()
             },
-            mappings = tail.map { it.destruct() }.map { (head, tail) ->
-                pattern.find(head)!!.groups.let { match ->
-                    Mapping(
-                        from = match["from"]!!.value,
-                        into = match["into"]!!.value,
-                        ranges = tail
-                            .map(String::numbers)
-                            .map { (target, source, size) -> Range(source, target, size) }
-                            .sortedBy { it.rangeFrom.first }
-                    )
-                }
+            mapping = tail.map { it.destruct() }.map { (_, data) ->
+                data.map { it.numbers() }
+                    .map { (target, source, size) -> Mapping(source, target, size) }
+                    .sortedBy { it.from.first }
             }
         )
     }
 
     operator fun LongRange.get(index: Long) = start + (step * index)
+
     fun LongRange.fastIndexOf(value: Long) = (value - start) / step
 
-    fun Iterable<Long>.calculate(): Long = minOf { value ->
-        model.mappings.fold(value) { result, mapping ->
-            mapping.ranges
-                .find { result in it.rangeFrom }
-                ?.let { it.rangeInto[it.rangeFrom.fastIndexOf(result)] }
-                ?: result
-        }
+    fun mapThrough(value: Long) = model.mapping.fold(value) { prev, next ->
+        next.find { prev in it.from }
+            ?.let { it.into[it.from.fastIndexOf(prev)] }
+            ?: prev
     }
 
-    fun part1(): Long = model.initial.data.calculate()
+    fun part1(): Long = model.initial.minOf(::mapThrough)
 
     fun part2(): Long {
-        return model.initial.data.chunked(2)
+        return model.initial.chunked(2)
             .map { (from, size) -> from..<(from + size) }
             .sortedBy { it.first }
             .stream()
             .parallel()
-            .mapToLong { it.calculate() }
+            .flatMapToLong { LongStream.rangeClosed(it.first, it.last) }
+            .map(::mapThrough)
             .min()
             .asLong
     }
