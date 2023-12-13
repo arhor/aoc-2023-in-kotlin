@@ -1,5 +1,4 @@
 import java.util.stream.LongStream
-import kotlin.time.measureTime
 
 fun main() {
     data class Mapping(val from: LongRange, val into: LongRange) {
@@ -45,6 +44,5 @@ fun main() {
         .min()
         .asLong
 
-    measureTime { part1().println() }.also { println("Operation took: $it") }
-    measureTime { part2().println() }.also { println("Operation took: $it") }
+    executeMeasuringTime(::part1, ::part2)
 }

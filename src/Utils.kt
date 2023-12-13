@@ -4,6 +4,7 @@ import java.util.LinkedList
 import kotlin.io.path.Path
 import kotlin.io.path.readLines
 import kotlin.math.abs
+import kotlin.time.measureTimedValue
 
 /**
  * Reads lines from the given input txt file.
@@ -22,6 +23,13 @@ fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteA
  */
 fun Any?.println() = println(this)
 
+fun executeMeasuringTime(vararg actions: () -> Any) {
+    for (action in actions) {
+        measureTimedValue(action).also {
+            println("Operation result: ${it.value}, execution took: ${it.duration}")
+        }
+    }
+}
 
 data class Point(val x: Int, val y: Int) : Comparable<Point> {
 
