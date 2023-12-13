@@ -28,13 +28,13 @@ fun main() {
 
     fun LongRange.fastIndexOf(value: Long) = (value - start) / step
 
-    fun mapThrough(value: Long) = model.mapping.fold(value) { prev, next ->
+    fun sequentialMap(value: Long) = model.mapping.fold(value) { prev, next ->
         next.find { prev in it.from }
             ?.let { it.into[it.from.fastIndexOf(prev)] }
             ?: prev
     }
 
-    fun part1(): Long = model.initial.minOf(::mapThrough)
+    fun part1(): Long = model.initial.minOf(::sequentialMap)
 
     fun part2(): Long {
         return model.initial.chunked(2)
@@ -43,7 +43,7 @@ fun main() {
             .stream()
             .parallel()
             .flatMapToLong { LongStream.rangeClosed(it.first, it.last) }
-            .map(::mapThrough)
+            .map(::sequentialMap)
             .min()
             .asLong
     }
